@@ -74,7 +74,7 @@ public class Server{
             out.println("  \u001B[32m✓ Connection Established!\u001B[0m");
             Thread.sleep(500);
             
-            out.print("\\033[2J");
+            out.print("\033[2J");
             out.flush();
         }
         
