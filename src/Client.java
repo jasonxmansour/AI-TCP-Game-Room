@@ -9,7 +9,7 @@ public class Client {
         try {
             Socket = new Socket("localhost", 8080);
             BufferedReader in = new BufferedReader(new InputStreamReader(Socket.getInputStream()));
-            PrintWriter out = new PrintWriter(Socket.getOutputStream(), true); // jasons printwriter
+            PrintWriter out = new PrintWriter(Socket.getOutputStream(), true); 
 
             String message;
             while ((message = in.readLine()) != null) {
