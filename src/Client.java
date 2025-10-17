@@ -9,6 +9,8 @@ public class Client {
         try {
             Socket = new Socket("localhost", 8080);
             BufferedReader in = new BufferedReader(new InputStreamReader(Socket.getInputStream()));
+            PrintWriter out = new PrintWriter(Socket.getOutputStream(), true); // jasons printwriter
+
             String message;
             while ((message = in.readLine()) != null) {
                 System.out.println(message);
@@ -16,6 +18,14 @@ public class Client {
                     break;
                 }
             }
+
+            //added scanner input
+            Scanner scanner = new Scanner(System.in);
+            while (scanner.hasNextLine()) {
+                String input = scanner.nextLine();
+                out.println(input);
+            }
+
         } catch (UnknownHostException e) {
             System.err.println("Unknown host: " + e.getMessage());
         } catch (IOException e) {
@@ -23,7 +33,7 @@ public class Client {
         }
     }
 
-    public static void main(String[] args){
-        Client client = new Client();
+    public static void main(String[] args){ 
+        new Client();
     }
 }

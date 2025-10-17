@@ -1,0 +1,15 @@
+
+out/
+bin/
+target/
+*.class
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.DS_Store
+Thumbs.db
+*.jar
+*.war
+*.ear
