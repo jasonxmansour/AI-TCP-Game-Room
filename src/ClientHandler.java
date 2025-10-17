@@ -3,6 +3,9 @@ import java.net.*;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
+    private PrintWriter out; 
+    private BufferedReader in;
+    private gameRoom currentRoom;
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -11,8 +14,8 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             showLoadingBar(out);
             showMenu(out);
@@ -134,6 +137,20 @@ public class ClientHandler implements Runnable {
                 break;
         }
         out.println("════════════════════════════════════════════════════════════════════════════════");
+    }
+
+    public void sendMessage(String message) {
+        if (out != null) {
+            out.println(message);
+        }
+    }
+    
+    private void cleanup() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

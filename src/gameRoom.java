@@ -1,15 +1,17 @@
 public class gameRoom {
      private int playerCount;
      private String roomName;
-     private Client[] players;
+     // changed these to clienthandler instead of client
+     private ClientHandler[] players;
      private final int ID;
+     private boolean gameStarted = false;
 
 
      public gameRoom(int ID) {
          this.playerCount = 0;
          this.ID = ID;
          this.giveName();
-         this.players = new Client[5];
+         this.players = new ClientHandler[5];
      }
 
      public void giveName() {
@@ -18,15 +20,29 @@ public class gameRoom {
          if (this.ID==3) this.roomName = "Treasure Hunt";
      }
 
-     public boolean join(Client client) {
+     public boolean join(ClientHandler client) {
          if (this.playerCount==5) return false;
 
          this.players[this.playerCount] = client;
          this.playerCount++;
-         System.out.println("Joined room "+ this.roomName + ".");
+         // system.out.print doesnt print to the server
+         broadcast("Player joined room " + this.roomName + ". (" + playerCount + "/5)");
          return true;
 
      }
+     // we need to add broadcast function 
+     
+     public boolean isGameStarted() {  
+        return gameStarted;
+    }
+
+    public String getRoomName() {  
+        return roomName;
+    }
+
+    public int getPlayerCount() {  
+        return playerCount;
+    }
 
 
 }
