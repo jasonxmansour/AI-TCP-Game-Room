@@ -6,9 +6,15 @@ public class ClientHandler implements Runnable {
     private PrintWriter out; 
     private BufferedReader in;
     private gameRoom currentRoom;
-
+    private String playerName;
+    
+    
     public ClientHandler(Socket socket) {
         this.socket = socket;
+    }
+    
+    public String getPlayerName(){
+    return this.playerName;
     }
 
     @Override
@@ -18,14 +24,23 @@ public class ClientHandler implements Runnable {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             showLoadingBar(out);
+            promptPlayerName(out, in);
             showMenu(out);
-
+            
+           
             
             String choice = in.readLine();     // Listen for client's choice
             if (choice != null) {
                 handleChoice(choice.trim(), out); 
             }
-
+            
+            gameRoom room = GameLobby.getInstance().getRoom(1);
+            if (room.join(this)) {
+                this.currentRoom = room; 
+            } else {
+                sendMessage("Unable to join room: " + room.getRoomName() + "\n Room full or already joined.");
+            }
+            
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -69,6 +84,14 @@ public class ClientHandler implements Runnable {
 
         out.print("\033[2J");
         out.flush();
+    }
+    
+    private void promptPlayerName( PrintWriter out, BufferedReader in ) throws IOException {
+        out.println("\n════════════════════════════════════════════════════════════════════════════════");
+        out.println("Please enter your player name:");
+        out.println("════════════════════════════════════════════════════════════════════════════════");
+        playerName = in.readLine(); 
+        out.println("\nWelcome, " + playerName + "!\n");
     }
 
     private void showMenu(PrintWriter out) {
