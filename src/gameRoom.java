@@ -14,14 +14,14 @@ public class gameRoom {
          this.players = new ClientHandler[5];
      }
 
-     public void giveName() {
+     private void giveName() {
          if (this.ID==1) this.roomName = "Matrix";
          if (this.ID==2) this.roomName = "Prison Break";
          if (this.ID==3) this.roomName = "Treasure Hunt";
      }
 
      public boolean join(ClientHandler client) {
-         if (this.playerCount==5) return false;
+         if (this.playerCount==5 || gameStarted) return false;
 
          this.players[this.playerCount] = client;
          this.playerCount++;
@@ -30,9 +30,15 @@ public class gameRoom {
          return true;
 
      }
-     // we need to add broadcast function 
+     // we need to add broadcast function
+
+    public void broadcast(String message) {
+        for (ClientHandler client : this.players) {
+            client.receiveMessage(message);
+        }
+    }
      
-     public boolean isGameStarted() {  
+    public boolean isGameStarted() {
         return gameStarted;
     }
 
