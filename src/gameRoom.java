@@ -34,7 +34,10 @@ public class gameRoom {
 
     public void broadcast(String message) {
         for (ClientHandler client : this.players) {
-            client.receiveMessage(message);
+            if (client != null) {
+                client.receiveMessage(message);
+            }
+            
         }
     }
      
