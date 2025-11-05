@@ -37,6 +37,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+
     private void showLoadingBar(PrintWriter out) throws InterruptedException {
         out.println("\n\n");
         out.println("  ╔════════════════════════════════════════════════════════╗");
@@ -143,6 +144,10 @@ public class ClientHandler implements Runnable {
         if (out != null) {
             out.println(message);
         }
+    }
+
+    public void receiveMessage(String message) {
+        out.println(message);
     }
     
     private void cleanup() {
