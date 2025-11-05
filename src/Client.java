@@ -11,15 +11,19 @@ public class Client {
             BufferedReader in = new BufferedReader(new InputStreamReader(Socket.getInputStream()));
             PrintWriter out = new PrintWriter(Socket.getOutputStream(), true); 
 
-            String message;
-            while ((message = in.readLine()) != null) {
-                System.out.println(message);
-                if (message.contains("Enter your choice")) {
-                    break;
+            // thread to keep reading messages from server
+            new Thread(() -> {
+                String message;
+                try {
+                    while ((message = in.readLine()) != null) {
+                        System.out.println(message);
+                    }
+                } catch (IOException e) {
+                    System.out.println("Connection closed.");
                 }
-            }
+            }).start();
 
-            //added scanner input
+            // added scanner input (for sending messages)
             Scanner scanner = new Scanner(System.in);
             while (scanner.hasNextLine()) {
                 String input = scanner.nextLine();
