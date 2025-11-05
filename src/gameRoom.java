@@ -20,13 +20,6 @@ public class gameRoom {
          if (this.ID==3) this.roomName = "Treasure Hunt";
      }
      
-     public void broadcast(String message) {
-     for (int i = 0; i < playerCount; i++) {
-         if (players[i] != null) {
-             players[i].sendMessage(message);
-         }
-     }
- }
      public boolean join(ClientHandler client) {
          if (this.playerCount==5 || gameStarted) return false;
 
