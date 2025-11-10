@@ -1,5 +1,6 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.FileReader;
 
 public class gameRoom {
      private int playerCount;
@@ -9,6 +10,7 @@ public class gameRoom {
      private final int ID;
      private boolean gameStarted = false;
      private FileWriter chatLogWriter;
+     private FileReader chatLogReader;
 
 
      public gameRoom(int ID) {
@@ -18,6 +20,7 @@ public class gameRoom {
          this.players = new ClientHandler[5];
          try {
             chatLogWriter = new FileWriter("chatLog"+ID+".txt", true);
+            chatLogReader = new FileReader("chatLog"+ID+".txt");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -32,14 +35,17 @@ public class gameRoom {
      
      public boolean join(ClientHandler client) {
          if (this.playerCount==5 || gameStarted) return false;
-
+        
          this.players[this.playerCount] = client;
          this.playerCount++;
          // system.out.print doesnt print to the server
+         client.catchUp();
          broadcast(client.getPlayerName() + " joined the room. (" + playerCount + "/5)");
          return true;
 
      }
+
+
      // we need to add broadcast function
 
     public void broadcast(String message) {
@@ -71,6 +77,10 @@ public class gameRoom {
 
     public int getPlayerCount() {  
         return playerCount;
+    }
+
+    public FileReader getFileReader() {
+        return this.chatLogReader;
     }
 
 

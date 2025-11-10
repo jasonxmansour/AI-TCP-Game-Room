@@ -169,6 +169,22 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    public void catchUp() {
+        
+        try {
+            BufferedReader currentPrintState = new BufferedReader(this.currentRoom.getFileReader());
+            String line;
+            while ((line = currentPrintState.readLine()) != null) {
+                System.out.println(line);
+            }
+            
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+    }
+
     public void receiveMessage(String message) {
         out.println(message);
     }
