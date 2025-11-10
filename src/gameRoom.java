@@ -1,3 +1,6 @@
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class gameRoom {
      private int playerCount;
      private String roomName;
@@ -5,6 +8,7 @@ public class gameRoom {
      private ClientHandler[] players;
      private final int ID;
      private boolean gameStarted = false;
+     private FileWriter chatLogWriter;
 
 
      public gameRoom(int ID) {
@@ -12,6 +16,12 @@ public class gameRoom {
          this.ID = ID;
          this.giveName();
          this.players = new ClientHandler[5];
+         try {
+            chatLogWriter = new FileWriter("chatLog"+ID+".txt", true);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
      }
 
      private void giveName() {
@@ -33,11 +43,21 @@ public class gameRoom {
      // we need to add broadcast function
 
     public void broadcast(String message) {
+        writeToFile(message);
         for (ClientHandler client : this.players) {
             if (client != null) {
                 client.receiveMessage(message);
             }
             
+        }
+    }
+
+    private void writeToFile(String message) {
+        try {
+            chatLogWriter.write(message+"\n");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
      
@@ -51,6 +71,18 @@ public class gameRoom {
 
     public int getPlayerCount() {  
         return playerCount;
+    }
+
+
+    //Clears chat log, will call this method when the game is over to prepare for a new game
+    private void clearChatLog() {
+        try {
+            FileWriter clearWriter = new FileWriter("chatLog"+ID+".txt", false);
+            clearWriter.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 
