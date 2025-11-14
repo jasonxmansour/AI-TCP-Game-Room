@@ -30,6 +30,22 @@ public class gameRoom {
          return true;
 
      }
+
+      //Removes a player from the game room when they leave or disconnect.
+     public void leave(ClientHandler client){  
+       for (int i = 0; i < playerCount; i++) {
+        if (players[i] == client) {
+            players[i] = players[playerCount - 1]; 
+            players[playerCount - 1] = null;       
+            playerCount--;
+            broadcast(client.getPlayerName() + " left the room. (" + playerCount + "/5)");
+            return;
+        }
+    }
+     }
+
+
+
      // we need to add broadcast function
 
     public void broadcast(String message) {

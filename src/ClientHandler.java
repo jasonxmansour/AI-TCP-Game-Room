@@ -18,7 +18,7 @@ public class ClientHandler implements Runnable {
     }
 
     @Override
-    public void run() {
+   public void run() {
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -31,26 +31,44 @@ public class ClientHandler implements Runnable {
             
             String choice = in.readLine();     // Listen for client's choice
             if (choice != null) {
-                handleChoice(choice.trim(), out); 
+                handleChoice(choice.trim(), out); //move to handleChoice
             }
+
+            String line;
+            while((line=in.readLine()) !=null){
+               // handles commands(ex. quit)
+            }
+
+            handleDisconnect();
             
-            gameRoom room = GameLobby.getInstance().getRoom(1);
-            if (room.join(this)) {
-                this.currentRoom = room; 
-            } else {
-                sendMessage("Unable to join room: " + room.getRoomName() + "\n Room full or already joined.");
-            }
             
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+             handleDisconnect();
         } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            handleDisconnect();
         }
     }
+
+     // Handles cleanup when a client disconnects from the server.
+    private void handleDisconnect() { 
+        try {
+            if (currentRoom != null) {
+                out.println(playerName + " disconnected from the server.");
+                currentRoom.leave(this); 
+                currentRoom = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
     private void showLoadingBar(PrintWriter out) throws InterruptedException {
@@ -144,25 +162,34 @@ public class ClientHandler implements Runnable {
         out.println("Enter your choice (1-3):");
     }
 
-    private void handleChoice(String choice, PrintWriter out) {
+        private void handleChoice(String choice, PrintWriter out) {
         out.println("\n════════════════════════════════════════════════════════════════════════════════");
+       
+         gameRoom room=null;
         switch (choice) {
             case "1":
-               
+                room = GameLobby.getInstance().getRoom(1);
                 break;
             case "2":
-              
+                room = GameLobby.getInstance().getRoom(2);
                 break;
             case "3":
-            
+                room = GameLobby.getInstance().getRoom(3);
                 break;
             default:
                 out.println("Invalid choice! Please restart and pick 1, 2, or 3.");
                 break;
         }
+
+        
+        if (room != null && room.join(this)) {
+            this.currentRoom = room;
+        } else {
+            sendMessage("Unable to join room: " + room.getRoomName() + "\n Room full or already joined.");
+        }
+
         out.println("════════════════════════════════════════════════════════════════════════════════");
     }
-
     public void sendMessage(String message) {
         if (out != null) {
             out.println(message);
