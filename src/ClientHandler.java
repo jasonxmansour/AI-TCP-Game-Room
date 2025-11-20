@@ -164,6 +164,7 @@ public class ClientHandler implements Runnable {
     }
 
     public void sendMessage(String message) {
+
         if (out != null) {
             out.println(message);
         }
