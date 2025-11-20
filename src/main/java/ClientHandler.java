@@ -41,6 +41,11 @@ public class ClientHandler implements Runnable {
                 sendMessage("Unable to join room: " + room.getRoomName() + "\n Room full or already joined.");
             }
             
+            String line;
+            while ((line = in.readLine()) != null) {
+                currentRoom.handlePlayerMessage(this, line);
+            }
+            
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -167,10 +172,6 @@ public class ClientHandler implements Runnable {
         if (out != null) {
             out.println(message);
         }
-    }
-
-    public void receiveMessage(String message) {
-        out.println(message);
     }
     
     private void cleanup() {
