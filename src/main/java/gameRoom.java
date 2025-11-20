@@ -1,8 +1,11 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class gameRoom {
      private int playerCount;
      private String roomName;
      // changed these to clienthandler instead of client
-     private ClientHandler[] players;
+     private final List<ClientHandler> players = new ArrayList<>();
      private final int ID;
      private boolean gameStarted = false;
 
@@ -11,7 +14,7 @@ public class gameRoom {
          this.playerCount = 0;
          this.ID = ID;
          this.giveName();
-         this.players = new ClientHandler[5];
+         
      }
 
      private void giveName() {
@@ -23,7 +26,7 @@ public class gameRoom {
      public boolean join(ClientHandler client) {
          if (this.playerCount==5 || gameStarted) return false;
 
-         this.players[this.playerCount] = client;
+         this.players.add(client);
          this.playerCount++;
          // system.out.print doesnt print to the server
          broadcast(client.getPlayerName() + " joined the room. (" + playerCount + "/5)");
@@ -35,10 +38,14 @@ public class gameRoom {
     public void broadcast(String message) {
         for (ClientHandler client : this.players) {
             if (client != null) {
-                 client.receiveMessage(message);
+                 client.sendMessage(message);
             }
            
         }
+    }
+
+    public void handlePlayerMessage(ClientHandler sender, String message) {
+        broadcast(sender.getPlayerName() + ": " + message);
     }
      
     public boolean isGameStarted() {
