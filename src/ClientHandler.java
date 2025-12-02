@@ -20,20 +20,19 @@ public class ClientHandler implements Runnable {
             showLoadingBar(out);
             showMenu(out);
 
-            
-            String choice = in.readLine();     // Listen for client's choice
-            if (choice != null) {
-                handleChoice(choice.trim(), out); 
+            String line;
+            // persistent command loop — clients can send commands continuously
+            while ((line = in.readLine()) != null) {
+                line = line.trim();
+                if (line.length() == 0) continue;
+                handleCommand(line, out);
+                // if client closed or requested exit, the readLine will return null and loop ends
             }
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            cleanup();
         }
     }
 
@@ -137,6 +136,101 @@ public class ClientHandler implements Runnable {
                 break;
         }
         out.println("════════════════════════════════════════════════════════════════════════════════");
+    }
+
+    private void handleCommand(String input, PrintWriter out) {
+        String cmd = input.trim();
+        String lower = cmd.toLowerCase();
+
+        try {
+            if (lower.startsWith("/join") || lower.startsWith("join")) {
+                // allows: "/join room1", "join room1", "join 1", "join room 2"
+                String[] parts = cmd.split("\\s+");
+                if (parts.length < 2) {
+                    out.println("Please specify a room, e.g. 'join room1' or 'join 1'.");
+                    return;
+                }
+                String target = parts[1].toLowerCase();
+                int roomId = -1;
+                if (target.startsWith("room")) {
+                    try { roomId = Integer.parseInt(target.replaceAll("[^0-9]", "")); } catch (NumberFormatException e) { roomId = -1; }
+                } else {
+                    try { roomId = Integer.parseInt(target); } catch (NumberFormatException e) { roomId = -1; }
+                }
+
+                if (roomId < 1 || roomId > 3) {
+                    out.println("Invalid room. Use room1, room2, or room3.");
+                    return;
+                }
+
+                gameRoom room = GameLobby.getInstance().getRoom(roomId);
+                if (room == null) {
+                    out.println("That room does not exist.");
+                    return;
+                }
+
+                synchronized(room) {
+                    if (room.isGameStarted()) {
+                        out.println(Commands.GAME_STARTED);
+                        return;
+                    }
+                    if (room.getPlayerCount() >= 5) {
+                        out.println(Commands.LOBBY_FULL);
+                        return;
+                    }
+                    boolean joined = room.join(this);
+                    if (joined) {
+                        this.currentRoom = room;
+                        out.println("Joined room " + room.getRoomName() + ".");
+                    } else {
+                        out.println("Unable to join room.");
+                    }
+                }
+
+                return;
+            }
+
+            if (lower.equals("/start") || lower.equals("start")) {
+                if (this.currentRoom == null) {
+                    out.println(Commands.MUST_BE_IN_LOBBY);
+                    return;
+                }
+                if (this.currentRoom.isGameStarted()) {
+                    out.println(Commands.GAME_STARTED);
+                    return;
+                }
+                this.currentRoom.startGame();
+                return;
+            }
+
+            if (lower.equals("/games") || lower.equals("games")) {
+                out.println(Commands.processCommand("/games"));
+                return;
+            }
+
+            if (lower.equals("/leave") || lower.equals("leave")) {
+                if (this.currentRoom == null) {
+                    out.println(Commands.MUST_BE_IN_LOBBY);
+                    return;
+                }
+                this.currentRoom.leave(this);
+                this.currentRoom = null;
+                out.println("You left the room.");
+                return;
+            }
+
+            // allow numeric menu selection (legacy)
+            if (lower.equals("1") || lower.equals("2") || lower.equals("3")) {
+                int requested = Integer.parseInt(lower);
+                handleCommand("join " + requested, out);
+                return;
+            }
+
+            // unknown command
+            out.println("Invalid command. Available: /join room1, /start, /games, /leave.");
+        } catch (Exception e) {
+            out.println("An error occurred processing your command.");
+        }
     }
 
     public void sendMessage(String message) {
