@@ -29,7 +29,7 @@ public class ClientHandler implements Runnable {
             
            
             
-            String choice = in.readLine();     // Listen for client's choice
+          String choice = in.readLine();     // Listen for client's choice
             if (choice != null) {
                 handleChoice(choice.trim(), out); 
             }
@@ -49,11 +49,7 @@ public class ClientHandler implements Runnable {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+           cleanup();
         }
     }
 
@@ -176,7 +172,12 @@ public class ClientHandler implements Runnable {
     
     private void cleanup() {
         try {
-            socket.close();
+            if (currentRoom != null) {
+                currentRoom.leave(this);  // >>> ADDED: tell the room this player left
+            }
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
