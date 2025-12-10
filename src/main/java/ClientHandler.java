@@ -14,7 +14,7 @@ public class ClientHandler implements Runnable {
     }
     
     public String getPlayerName(){
-    return this.playerName;
+        return this.playerName;
     }
 
     @Override
@@ -27,23 +27,16 @@ public class ClientHandler implements Runnable {
             promptPlayerName(out, in);
             showMenu(out);
             
-           
-            
             String choice = in.readLine();     // Listen for client's choice
             if (choice != null) {
                 handleChoice(choice.trim(), out); 
             }
             
-            gameRoom room = GameLobby.getInstance().getRoom(1);
-            if (room.join(this)) {
-                this.currentRoom = room; 
-            } else {
-                sendMessage("Unable to join room: " + room.getRoomName() + "\n Room full or already joined.");
-            }
-            
             String line;
             while ((line = in.readLine()) != null) {
-                currentRoom.handlePlayerMessage(this, line);
+                if (currentRoom != null) {
+                    currentRoom.handlePlayerMessage(this, line);
+                }
             }
             
         } catch (IOException | InterruptedException e) {
@@ -92,7 +85,7 @@ public class ClientHandler implements Runnable {
         out.flush();
     }
     
-    private void promptPlayerName( PrintWriter out, BufferedReader in ) throws IOException {
+    private void promptPlayerName(PrintWriter out, BufferedReader in) throws IOException {
         out.println("\n════════════════════════════════════════════════════════════════════════════════");
         out.println("Please enter your player name:");
         out.println("════════════════════════════════════════════════════════════════════════════════");
@@ -151,19 +144,28 @@ public class ClientHandler implements Runnable {
 
     private void handleChoice(String choice, PrintWriter out) {
         out.println("\n════════════════════════════════════════════════════════════════════════════════");
+        int roomID;
         switch (choice) {
             case "1":
-               
+                roomID = 1; // Matrix
                 break;
             case "2":
-              
+                roomID = 2; // Prison Break
                 break;
             case "3":
-            
+                roomID = 3; // Treasure Hunt
                 break;
             default:
                 out.println("Invalid choice! Please restart and pick 1, 2, or 3.");
-                break;
+                return;
+        }
+        
+        gameRoom room = GameLobby.getInstance().getRoom(roomID);
+        if (room.join(this)) {
+            this.currentRoom = room;
+            sendMessage("Welcome to " + room.getRoomName() + "!");
+        } else {
+            sendMessage("Unable to join " + room.getRoomName() + " - room is full or game already started.");
         }
         out.println("════════════════════════════════════════════════════════════════════════════════");
     }

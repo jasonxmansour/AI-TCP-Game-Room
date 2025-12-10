@@ -2,52 +2,75 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class gameRoom {
-     private int playerCount;
-     private String roomName;
-     // changed these to clienthandler instead of client
-     private final List<ClientHandler> players = new ArrayList<>();
-     private final int ID;
-     private boolean gameStarted = false;
+    private int playerCount;
+    private String roomName;
+    private final List<ClientHandler> players = new ArrayList<>();
+    private final int ID;
+    private boolean gameStarted = false;
+    private GameController gameController;
 
+    public gameRoom(int ID) {
+        this.playerCount = 0;
+        this.ID = ID;
+        this.giveName();
+    }
 
-     public gameRoom(int ID) {
-         this.playerCount = 0;
-         this.ID = ID;
-         this.giveName();
-         
-     }
+    private void giveName() {
+        if (this.ID == 1) this.roomName = "Matrix";
+        if (this.ID == 2) this.roomName = "Prison Break";
+        if (this.ID == 3) this.roomName = "Treasure Hunt";
+    }
+    
+    public boolean join(ClientHandler client) {
+        if (this.playerCount == 5 || gameStarted) return false;
 
-     private void giveName() {
-         if (this.ID==1) this.roomName = "Matrix";
-         if (this.ID==2) this.roomName = "Prison Break";
-         if (this.ID==3) this.roomName = "Treasure Hunt";
-     }
-     
-     public boolean join(ClientHandler client) {
-         if (this.playerCount==5 || gameStarted) return false;
-
-         this.players.add(client);
-         this.playerCount++;
-         // system.out.print doesnt print to the server
-         broadcast(client.getPlayerName() + " joined the room. (" + playerCount + "/5)");
-         return true;
-
-     }
-     // we need to add broadcast function
+        this.players.add(client);
+        this.playerCount++;
+        broadcast(client.getPlayerName() + " joined the room. (" + playerCount + "/5)");
+        return true;
+    }
 
     public void broadcast(String message) {
         for (ClientHandler client : this.players) {
             if (client != null) {
-                 client.sendMessage(message);
+                client.sendMessage(message);
             }
-           
         }
     }
 
     public void handlePlayerMessage(ClientHandler sender, String message) {
-        broadcast(sender.getPlayerName() + ": " + message);
+        if (message.trim().equalsIgnoreCase("/start")) {
+            if (!gameStarted && playerCount >=1) {
+                gameStarted = true;
+                broadcast("Game starting! " + sender.getPlayerName() + " initiated the game.");
+                this.gameController = new GameController(this, this.roomName);
+            } else if (gameStarted) {
+                sender.sendMessage("Game already started!");
+            } else {
+                sender.sendMessage("Need at least 2 players to start. Current: " + playerCount);
+            }
+        } else if (message.trim().toLowerCase().startsWith("/vote ") && gameStarted && gameController != null) {
+            try {
+                int choice = Integer.parseInt(message.trim().substring(6));
+                gameController.handleVote(sender.getPlayerName(), choice);
+            } catch (NumberFormatException e) {
+                sender.sendMessage("Usage: /vote [1-4]");
+            }
+        } else if (!gameStarted) {
+            broadcast(sender.getPlayerName() + ": " + message);
+        }
     }
-     
+    
+    public void sendToPlayer(String playerName, String message) {
+        for (ClientHandler client : players) {
+            if (client != null && client.getPlayerName() != null && 
+                client.getPlayerName().equals(playerName)) {
+                client.sendMessage(message);
+                break;
+            }
+        }
+    }
+    
     public boolean isGameStarted() {
         return gameStarted;
     }
@@ -60,5 +83,7 @@ public class gameRoom {
         return playerCount;
     }
 
-
+    public void setGameController(GameController controller) {
+        this.gameController = controller;
+    }
 }
