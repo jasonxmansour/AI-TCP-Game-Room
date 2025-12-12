@@ -7,7 +7,7 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private gameRoom currentRoom;
     private String playerName;
-    
+    private boolean normalExit = false;
     
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -40,7 +40,9 @@ public class ClientHandler implements Runnable {
             }
             
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+           if (!normalExit) {
+                e.printStackTrace();
+            }
         } finally {
             cleanup();
         }
@@ -170,6 +172,21 @@ public class ClientHandler implements Runnable {
         if (out != null) {
             out.println(message);
         }
+    }
+    
+    public void leaveRoomAndDisconnect() {
+        normalExit = true;
+
+        if (currentRoom != null) {
+            currentRoom.leave(this);   
+            currentRoom = null;        
+        }
+
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();        
+            }
+        } catch (IOException ignored) {}
     }
     
     private void cleanup() {

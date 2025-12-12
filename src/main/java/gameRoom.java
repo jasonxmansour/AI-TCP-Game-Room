@@ -48,6 +48,11 @@ public class gameRoom {
     }
 
     public void handlePlayerMessage(ClientHandler sender, String message) {
+        if (message.trim().equalsIgnoreCase("/leave") || message.trim().equalsIgnoreCase("/quit")) {
+            sender.sendMessage("You have left the room");
+            sender.leaveRoomAndDisconnect(); // remove from room + close socket
+            return;
+        }
         if (message.trim().equalsIgnoreCase("/start")) {
             if (!gameStarted && playerCount >=1) {
                 gameStarted = true;
