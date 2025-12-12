@@ -18,6 +18,7 @@ public class Client {
                     while ((message = in.readLine()) != null) {
                         System.out.println(message);
                     }
+                    System.out.println("Disconnected from server.");
                 } catch (IOException e) {
                     System.out.println("Connection closed.");
                 }
