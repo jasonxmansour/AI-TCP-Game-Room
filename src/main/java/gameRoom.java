@@ -30,6 +30,15 @@ public class gameRoom {
         return true;
     }
 
+    public void leave(ClientHandler client) {
+        if (players.remove(client)) {                      
+            if (playerCount > 0) {
+                playerCount--;
+            }
+            broadcast(client.getPlayerName() + " left the room. (" + playerCount + "/5)");
+        }
+    }
+
     public void broadcast(String message) {
         for (ClientHandler client : this.players) {
             if (client != null) {

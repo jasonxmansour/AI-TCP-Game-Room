@@ -42,11 +42,7 @@ public class ClientHandler implements Runnable {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            cleanup();
         }
     }
 
@@ -177,8 +173,13 @@ public class ClientHandler implements Runnable {
     }
     
     private void cleanup() {
-        try {
-            socket.close();
+    try {
+            if (currentRoom != null) {
+                currentRoom.leave(this);  // >>> ADDED: tell the room this player left
+            }
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
