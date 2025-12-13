@@ -1,0 +1,112 @@
+.\" Manpage for AI TCP Game Room
+.TH ai-tcp-game-room 1 "December 2025" "1.0" "AI TCP Game Room"
+.SH NAME
+AI TCP Game Room \- Multiplayer text-based RPG server and client in Java
+.SH SYNOPSIS
+.B java Server
+.br
+.B java Client
+.SH DESCRIPTION
+The
+.B AI-TCP-Game-Room
+provides a text-based multiplayer game environment with three game types: 
+Matrix, Prison Break, and Treasure Hunt.
+
+Players can connect to a server running
+.B Server
+and interact using 
+.B Client
+This game features a chat system, voting-based actions, and an AI-generated continuous story using the OpenAI API.
+
+.SH CLASSES
+.TP
+.B GameLobby
+Manages up to three game rooms. Provides methods to get individual rooms.
+.TP
+.B gameRoom
+Represents a game room: tracking players, broadcasting messages, handling votes, and controlling current game state.
+.TP
+.B GameController
+Manages in-game logic, ongoing story narration, and player voting. Integrates with OpenAI API to generate a story.
+.TP
+.B ClientHandler
+Handles a single client connection, including reading input, sending messages, and forwarding player actions to the room.
+.TP
+.B Server
+Starts a server socket on port 8080 and listens for client connections.
+.TP
+.B Client
+Connects to a server at localhost:8080, reads server messages, and sends user input.
+
+.SH USAGE
+Run the server:
+.RS
+$ java Server.java
+.RE
+
+Start a client:
+.RS
+$ java Client.java
+.RE
+
+Once connected, the client will prompt for a player name, then display a menu to select a game:
+.RS
+1. Matrix
+2. Prison Break
+3. Treasure Hunt
+.RE
+
+After joining a room, players can send chat messages or use commands:
+.TP
+.B /start
+Starts the game (requires at least 1 player).
+.TP
+.B /vote [1-4]
+Votes for a choice during the game. Only works when voting is active.
+.TP
+.B /leave
+Closes a client's connection, leaving the room.
+
+.SH ENVIRONMENT
+The server REQUIRES the environment variable:
+.TP
+.B OPENAI_API_KEY
+An OpenAI API key for calling a model to generate the AI-based story narration.
+
+.SH EXAMPLES
+Run server and connect three clients:
+.RS
+$ java Server.java
+$ java Client.java
+$ java Client.java
+$ java Client.java
+.RE
+
+In the client, select a game:
+.RS
+Enter your choice (1-3): 1
+.RE
+
+
+A player starts the game using:
+.RS
+/start
+.RE
+
+During the game, players vote using:
+.RS
+/vote 2
+.RE
+
+.SH NOTES
+.TP
+ - There's a maximum of 5 players per room.
+.TP
+ - Only one game can run per room at a time.
+.TP
+ - The AI story continues until a "GAME OVER" condition is reached.
+
+.SH AUTHORS
+Jason Mansour, Jack Huckins, Chris Hu, Tiernan Hennessy, Omer Bashir
+.SH COPYRIGHT
+MIT License — free to use, modify, and distribute with attribution.
